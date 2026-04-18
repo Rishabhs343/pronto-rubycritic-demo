@@ -22,6 +22,8 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
+      - name: Refresh git-sourced pronto-rubycritic
+        run: bundle update pronto-rubycritic
       - name: Fetch base branch
         run: git fetch origin ${{ github.base_ref }}
       - name: Run pronto-rubycritic
