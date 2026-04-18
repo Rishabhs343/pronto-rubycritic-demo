@@ -1,0 +1,35 @@
+name: Pronto
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  pronto:
+    name: pronto-rubycritic
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.base_ref }}
+      - name: Run pronto-rubycritic
+        env:
+          PRONTO_PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
+          PRONTO_GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRONTO_RUBYCRITIC_SEVERITY_LEVEL: warning
+        run: |
+          bundle exec pronto run \
+            -r rubycritic \
+            -c origin/${{ github.base_ref }} \
+            -f github_pr github_status

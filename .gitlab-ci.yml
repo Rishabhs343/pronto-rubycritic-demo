@@ -1,0 +1,35 @@
+image: ruby:3.3
+
+stages:
+  - lint
+
+variables:
+  BUNDLE_PATH: vendor/bundle
+  BUNDLE_JOBS: '4'
+
+cache:
+  key:
+    files:
+      - Gemfile
+  paths:
+    - vendor/bundle
+
+before_script:
+  - apt-get update -qq && apt-get install -yq cmake libgit2-dev git
+  - gem install bundler --no-document
+  - bundle install
+
+pronto:
+  stage: lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  variables:
+    PRONTO_RUBYCRITIC_SEVERITY_LEVEL: warning
+    # Set PRONTO_GITLAB_API_PRIVATE_TOKEN in Project > Settings > CI/CD > Variables.
+    PRONTO_GITLAB_API_ENDPOINT: $CI_API_V4_URL
+  script:
+    - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - bundle exec pronto run
+        -r rubycritic
+        -c "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        -f gitlab_mr
