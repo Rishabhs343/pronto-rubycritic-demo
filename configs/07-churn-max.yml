@@ -1,0 +1,3 @@
+# Scenario 07 — drop modules whose git churn exceeds 5 commits.
+churn:
+  max: 5

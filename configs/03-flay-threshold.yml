@@ -1,0 +1,3 @@
+# Scenario 03 — drop flay smells whose score exceeds 30.
+flay:
+  max_score: 30

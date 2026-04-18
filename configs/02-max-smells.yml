@@ -1,0 +1,3 @@
+# Scenario 02 — cap total smells per module to 3.
+reek:
+  max_smells: 3

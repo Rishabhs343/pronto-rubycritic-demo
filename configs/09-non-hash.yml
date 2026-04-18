@@ -1,0 +1,4 @@
+# Scenario 09 — YAML that parses to a Symbol (":foo"), not a Hash.
+# Expected behaviour: pronto-rubycritic emits "must be a YAML mapping (Hash);
+# got Symbol. Ignoring." and falls back to {}.
+:foo

@@ -1,0 +1,8 @@
+# Scenario 05 — skip flay/flog analysis for paths matching these globs.
+# Matched relative to the repo root with FNM_PATHNAME + FNM_DOTMATCH.
+flay:
+  exclude:
+    - 'app/validator_*.rb'
+flog:
+  exclude:
+    - 'app/complex_*.rb'
