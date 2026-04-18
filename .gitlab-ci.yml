@@ -4,8 +4,8 @@ stages:
   - lint
 
 variables:
-  BUNDLE_PATH:  vendor/bundle
-  BUNDLE_JOBS:  '4'
+  BUNDLE_PATH: vendor/bundle
+  BUNDLE_JOBS: '4'
 
 cache:
   key:
@@ -19,35 +19,22 @@ before_script:
   - gem install bundler --no-document
   - bundle install
 
-# Same "only latest run's comments visible" pattern as the GitHub workflow.
-# Requires a token with api scope:
-#   Settings > CI/CD > Variables > add PRONTO_GITLAB_API_PRIVATE_TOKEN
-.cleanup_previous_run: &cleanup_previous_run
-  - BRAND='https://github.com/Rishabhs343/custom-pronto-gem'
-  - >
-    echo "Cleaning up any previous pronto-rubycritic notes on MR !$CI_MERGE_REQUEST_IID…";
-    curl --silent --header "PRIVATE-TOKEN: $PRONTO_GITLAB_API_PRIVATE_TOKEN"
-      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes?per_page=100"
-    | jq -r --arg brand "$BRAND" '.[] | select(.body | contains($brand)) | .id'
-    | while read -r note_id; do
-        echo "  - delete MR note #$note_id";
-        curl --silent --header "PRIVATE-TOKEN: $PRONTO_GITLAB_API_PRIVATE_TOKEN"
-          --request DELETE
-          "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes/$note_id";
-      done
-
 pronto:
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-  interruptible: true   # newest MR push cancels older runs
+  interruptible: true          # newest MR push cancels any in-flight run
   variables:
     PRONTO_RUBYCRITIC_SEVERITY_LEVEL: warning
-    PRONTO_GITLAB_API_ENDPOINT:       $CI_API_V4_URL
+    PRONTO_GITLAB_API_ENDPOINT: $CI_API_V4_URL
   script:
-    - *cleanup_previous_run
+    # 1. Delete every note/discussion from a previous pronto-rubycritic run
+    #    so the MR shows only the latest output.
+    - bash scripts/cleanup-previous-mr-notes.sh
+    # 2. Refresh the git-sourced gem so we always have the latest pronto-rubycritic.
+    - bundle update pronto-rubycritic
+    # 3. Run pronto against the diff.
     - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
-    - bundle exec pronto run
-        -r rubycritic
+    - bundle exec pronto run -r rubycritic
         -c "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
         -f gitlab_mr
