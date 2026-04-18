@@ -1,28 +1,7 @@
-# Filter which smells pronto-rubycritic reports on PR lines.
-# All keys are optional — with no file at all, every smell on every
-# added/changed line is reported at :warning severity.
-
-reek:
-  smell_types:
-    - FeatureEnvy
-    - LongParameterList
-    - DuplicateMethodCall
-    - UncommunicativeMethodName
-    - UncommunicativeVariableName
-  max_smells: 5
-
-flay:
-  max_score: 100
-  exclude:
-    - 'spec/**/*'
-
-flog:
-  max_score: 20
-  exclude:
-    - 'spec/**/*'
-
-complexity:
-  max: 15
-
-churn:
-  max: 10
+# Default config for the demo — intentionally left empty so every smell
+# on every added line is reported. Copy one of the files in configs/ over
+# this file to try each filter scenario.
+#
+# Examples:
+#   cp configs/01-filter-by-smell-types.yml .rubycritic-pronto.yml
+#   cp configs/06-complexity-max.yml        .rubycritic-pronto.yml

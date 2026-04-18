@@ -1,0 +1,3 @@
+# Scenario 04 — drop flog smells whose complexity score exceeds 10.
+flog:
+  max_score: 10

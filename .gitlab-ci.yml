@@ -15,7 +15,7 @@ cache:
     - vendor/bundle
 
 before_script:
-  - apt-get update -qq && apt-get install -yq cmake libgit2-dev git
+  - apt-get update -qq && apt-get install -yq cmake libgit2-dev git jq curl
   - gem install bundler --no-document
   - bundle install
 
@@ -23,13 +23,18 @@ pronto:
   stage: lint
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  interruptible: true          # newest MR push cancels any in-flight run
   variables:
     PRONTO_RUBYCRITIC_SEVERITY_LEVEL: warning
-    # Set PRONTO_GITLAB_API_PRIVATE_TOKEN in Project > Settings > CI/CD > Variables.
     PRONTO_GITLAB_API_ENDPOINT: $CI_API_V4_URL
   script:
+    # 1. Delete every note/discussion from a previous pronto-rubycritic run
+    #    so the MR shows only the latest output.
+    - bash scripts/cleanup-previous-mr-notes.sh
+    # 2. Refresh the git-sourced gem so we always have the latest pronto-rubycritic.
+    - bundle update pronto-rubycritic
+    # 3. Run pronto against the diff.
     - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
-    - bundle exec pronto run
-        -r rubycritic
+    - bundle exec pronto run -r rubycritic
         -c "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
         -f gitlab_mr

@@ -1,0 +1,3 @@
+# Scenario 06 — drop modules whose cyclomatic complexity exceeds 10.
+complexity:
+  max: 10

@@ -1,0 +1,6 @@
+# Scenario 08 — intentionally malformed YAML.
+# Expected behaviour: pronto-rubycritic emits a stderr warning ("invalid YAML")
+# and silently falls back to {} (no filtering) so the PR still gets feedback.
+:
+:
+- [

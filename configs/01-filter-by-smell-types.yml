@@ -1,0 +1,8 @@
+# Scenario 01 — keep only three reek smell types.
+# All flay/flog smells still pass through because smell_types only filters
+# reek-analyser smells.
+reek:
+  smell_types:
+    - FeatureEnvy
+    - LongParameterList
+    - DuplicateMethodCall
